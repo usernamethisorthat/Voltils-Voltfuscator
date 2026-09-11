@@ -2,7 +2,7 @@
 A Lua 5.1 / Luau Obfuscator 🔒
 
 *Discord server:* [Voltils](https://discord.gg/78yYmtaeg4)
-| *Website:* https://voltils.cc/obfuscate
+| *Website:* https://voltils.cc
 -
 
 **About Voltfuscator**
@@ -13,27 +13,31 @@ You can quickly obfuscate code using:
 
     The Discord bot (DM it directly)
 
+    The Website at voltils.cc
+
     The free API keys we offer to developers
 
 We also include built‑in **anti‑tamper** and **anti‑env‑logger**.
 
 ——————————————————————————————————————————
--
 **Privacy**
 
-Your code is **never stored.**
+Your uploaded code is **never stored.**
 *It is processed only for obfuscation and then deleted shortly after.*
 *We have no interest in collecting or reusing user code, our goal is to make Voltils as strong and reliable as possible for everyone.*
+Full Policy: https://voltils.cc/privacy/
 
 ——————————————————————————————————————————
--
 **Obfuscation Sample**
 
-Voltils‑obfuscated version of source/example.lua included in this repository.
+Voltfuscator‑obfuscated file is [example.lua](https://github.com/usernamethisorthat/Voltils-Voltfuscator/blob/main/example.lua) included in this repository.
 
+——————————————————————————————————————————
+**Notices**
 
-
-
+TOS: https://voltils.cc/tos/
+Privacy Policy: https://voltils.cc/privacy/
+Use Policy: https://voltils.cc/use-policy/
 
 
 
