@@ -101,7 +101,7 @@ Voltfuscator's goal is to make unauthorized analysis and source recovery substan
 
 ## Example output
 
-[example.lua](./example.lua) is an included Voltfuscator v7.5 output sample. It is intentionally large and machine-generated. The sample demonstrates the shape of production output; it is not a copy of the obfuscator implementation.
+[example.lua](./example.lua) is an included Voltfuscator v7.6 output sample. It is intentionally large and machine-generated. The sample demonstrates the shape of production output; it is not a copy of the obfuscator implementation.
 
 ## Repository scope
 
@@ -109,7 +109,7 @@ This is a public information and output-sample repository. It is **not** the com
 
 ```text
 README.md                       Public documentation
-example.lua                     Voltfuscator v7.5 output sample
+example.lua                     Voltfuscator v7.6 output sample
 source/Voltfuscator/vm.lua      Source-availability notice
 ```
 
