@@ -1,71 +1,75 @@
 # Voltfuscator
 
-Note: This README.md has some outdated info... i dont feel like getting it updated
+Voltfuscator is a hosted Lua 5.1 and Luau obfuscation service maintained by **Voltils**. It increases the effort required to inspect or reconstruct scripts while preserving their intended behavior.
 
-Voltfuscator is a hosted Lua 5.1 and Luau obfuscation service maintained by **Voltils**. It is designed to increase the time and effort required to inspect, copy, or reconstruct a Lua program while keeping the protected program usable in its intended runtime.
+Updated **October 10, 2026** for the current **Voltfuscator 7.6 Nyx** release.
 
-> Current production version: **Voltfuscator v7.6**  
-> Current public preset: **Normal**
+[Website](https://voltils.cc/) · [Obfuscator dashboard](https://voltils.cc/dashboard/#obfuscate) · [Documentation](https://voltils.cc/docs/) · [Discord](https://discord.gg/78yYmtaeg4)
 
-[Website](https://voltils.cc) · [Web obfuscator](https://voltils.cc/obfuscate/) · [Discord](https://discord.gg/78yYmtaeg4) · [API health](https://api.voltils.nxtdev.xyz/v1/health)
+## Presets
 
-## Current service
+Both presets are available through the website, Discord bot, and API:
 
-Voltfuscator currently provides one maintained public preset instead of several overlapping strength levels. The **Normal** preset is the same production preset used by the website, authenticated API, and Discord bot.
+| Preset | API value | Purpose |
+| --- | --- | --- |
+| Normal | `normal` | A balanced option for everyday use. |
+| Max | `max` | Stronger protection; processing can take longer. |
 
-At a high level, the current release provides:
+Normal is the default when an API request omits `preset`. There is no public Light preset.
 
-- Lua 5.1 and supported Luau input handling
-- Whole-program protection intended for Roblox and other compatible Lua environments
-- Virtualized and transformed program logic
-- Protected strings, constants, numbers, identifiers, and control flow
-- Randomized output between builds
-- Minified, self-contained output with no extra runtime file to distribute
-- Anti-tamper protection enabled by default on the public API
-- Optional Anti-HTTP Spy protection through the Discord bot
-- Syntax validation and clear errors for invalid or unsupported input
+## Accounts and shared quotas
 
-This repository intentionally does not document internal algorithms, keys, generated instruction formats, or implementation details.
+Sign in with Discord. New accounts start on **Basic**. Every signed-in account can generate and use API keys; API access does not require a Pro upgrade or manual approval.
 
-## Ways to use Voltfuscator
+| Tier | Successful obfuscations |
+| --- | --- |
+| Basic | **3 per rolling 12 hours** |
+| Pro | **16 per rolling 12 hours** |
 
-### Website
+Website, bot, and API builds share the same account allowance. Creating more keys does not increase it. Each slot returns 12 hours after its successful build completes; midnight does not reset the allowance. Failed builds do not consume successful-build quota. Pending jobs temporarily reserve a slot.
 
-Use the hosted interface at [voltils.cc/obfuscate](https://voltils.cc/obfuscate/). The website uses the current production backend and Normal preset.
+## Website
 
-### Discord bot
+1. Open [the dashboard](https://voltils.cc/dashboard/#obfuscate) and sign in with Discord.
+2. Paste your Lua or Luau source.
+3. Select **Normal** or **Max**, then obfuscate.
+4. Copy or download the output before leaving the workspace.
 
-Join the [Voltils Discord](https://discord.gg/78yYmtaeg4), then send the bot a direct message containing a `.lua` or `.txt` attachment. The bot opens an obfuscation panel where you can review the file and available protection options before processing it.
+## Discord bot
 
-Current bot behavior:
+Join the [Discord server](https://discord.gg/78yYmtaeg4), then DM the bot a `.lua` or `.txt` attachment. Its panel lets you choose Normal or Max and review protection options.
 
-- Accepts `.lua` and `.txt` attachments
-- Maximum input size: **350 KiB**
-- Uses the production **Normal** preset
-- Anti-tamper is enabled for new sessions
-- Anti-HTTP Spy can be enabled from the panel when the target runtime supports the required checks
-- Requires acceptance of the Terms of Service and Privacy Policy
-- Requires `dsc.gg/obfuscating` in the user's visible Discord status
-- Standard limit: **3 obfuscations per 12 hours** with a **10-minute cooldown**
+- Accept the Terms of Service and Privacy Policy when prompted.
+- Set `dsc.gg/obfuscating` in your visible Discord status.
+- The bot has a **10-minute cooldown** per user.
+- Anti-tamper starts enabled for new sessions.
+- Optional Anti-HTTP Spy is available through the bot panel for compatible runtimes.
+- Successful jobs use your shared Basic or Pro quota.
 
-Operational limits may change as capacity and abuse controls are adjusted.
+## Getting an API key
 
-### API
+1. Sign in at [voltils.cc/dashboard](https://voltils.cc/dashboard/#keys).
+2. Open **API Keys**, enter a name, and select **Create key**.
+3. Store the key in a server-side environment variable.
 
-The authenticated production endpoint is:
+Each account can have **up to three active keys**. You can view an active key again after signing in, or revoke it from the dashboard. Keys expire after **30 days without API use**. Never put your key in public repositories, browser code, or scripts you distribute.
+
+## API
+
+Use the current public endpoint:
 
 ```text
-POST https://api.voltils.nxtdev.xyz/v1/obfuscate
-Authorization: Bearer <API_KEY>
+POST https://voltils.cc/v1/obfuscate
+Authorization: Bearer YOUR_API_KEY
 Content-Type: application/json
 ```
 
-Request body:
+Example request using Max:
 
 ```json
 {
-  "code": "print('Hello from Voltfuscator')",
-  "preset": "normal"
+  "code": "print('Hello from Voltfuscator!')",
+  "preset": "max"
 }
 ```
 
@@ -78,53 +82,45 @@ Successful response:
 }
 ```
 
-API notes:
+`code` must be nonempty UTF-8 source. `preset` accepts `normal` or `max` and defaults to `normal`. Account usage metadata is returned in the `X-Voltfuscator-Usage` response header. `GET https://voltils.cc/v1/obfuscate` returns service and tier information; it does not compile a script.
 
-- An issued Voltfuscator API key is required.
-- `code` must be valid UTF-8 Lua/Luau source text.
-- `preset` is optional and currently accepts only `normal`.
-- Maximum source size: **500 KiB**.
-- API requests are rate-limited.
-- Anti-tamper is enabled by the production API; individual internal passes are not exposed as request options.
+The old `api.voltils.nxtdev.xyz` URL is not the endpoint documented for current clients.
 
-The unauthenticated health endpoint is available at:
+### Limits and errors
+
+- Source size: **350 KiB** of UTF-8 text across the hosted service.
+- Compiler budget: **60 seconds** per build.
+- One active job per account; the compiler also has one processing slot.
+- An interrupted connection can leave a reservation pending for up to **90 seconds**. A success already confirmed still counts.
+- `400`: invalid request or preset; `401`: invalid, expired, or revoked credentials; `413`: invalid source size; `429`: quota, attempt limit, or compiler busy; `5xx`: temporary service/compiler failure.
+
+Follow retry guidance when rate-limited or busy. Limits may change; the live dashboard and documentation are the current reference.
+
+## Included examples
+
+The examples were regenerated with the current release. Both protected files run the same source and print:
 
 ```text
-GET https://api.voltils.nxtdev.xyz/v1/health
+Hello from Voltfuscator!
 ```
 
-## Compatibility and expectations
-
-Voltfuscator targets Lua 5.1 and Luau. Platform-specific globals and APIs used by an input script must still exist in the environment where the output runs. Because obfuscation increases file size and startup work, test protected output in the real target environment before distributing it.
-
-Obfuscation is not encryption, access control, or a substitute for server-side security. A determined analyst who controls the runtime may still observe program behavior and values used during execution. Secrets, private keys, privileged decisions, and authoritative validation should remain on a trusted server.
-
-Voltfuscator's goal is to make unauthorized analysis and source recovery substantially more expensive—not to promise that client-side code can never be analyzed.
-
-## Example output
-
-[example.lua](./example.lua) is an included Voltfuscator v7.6 output sample. It is intentionally large and machine-generated. The sample demonstrates the shape of production output; it is not a copy of the obfuscator implementation.
-
-## Repository scope
-
-This is a public information and output-sample repository. It is **not** the complete production obfuscator source tree.
-
 ```text
-README.md                       Public documentation
-example.lua                     Voltfuscator v7.6 output sample
+README.md                      Service and API documentation
+example.source.lua             Readable example input
+example.lua                    Max protected output
 source/Voltfuscator/vm.lua      Source-availability notice
 ```
 
+Run either protected sample directly in a supported Lua 5.1 or Luau host. Keep its generated formatting intact. These examples are output samples, not the compiler implementation.
+
+## Compatibility and source availability
+
+This package is a public information and output-sample distribution. It does **not** contain the private production obfuscator source.
+
+Your script's required APIs must exist in the target environment. Test the protected output in that environment before distributing it.
+
 ## Privacy and policies
 
-Submitted source is processed to produce an obfuscated result and is not intended to be retained by Voltils as a reusable source-code archive. When using Discord or another third-party service, that platform's own data handling may also apply. Review the current policies before submitting code:
+Submitted source is processed to produce protected output rather than retained as a source archive. Account activity stores job metadata; Discord and other providers have their own data handling. Only submit code you own or are authorized to process.
 
-- [Terms of Service](https://voltils.cc/tos/)
-- [Privacy Policy](https://voltils.cc/privacy/)
-- [Use Policy](https://voltils.cc/use-policy/)
-
-Only submit code that you own or are authorized to process.
-
-## Community
-
-For service access, API-key availability, support, and current announcements, join the [Voltils Discord server](https://discord.gg/78yYmtaeg4).
+[Terms of Service](https://voltils.cc/tos/) · [Privacy Policy](https://voltils.cc/privacy/) · [Use Policy](https://voltils.cc/use-policy/)
