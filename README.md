@@ -2,7 +2,7 @@
 
 Voltfuscator is a hosted Lua 5.1 and Luau obfuscation service maintained by **Voltils**. It increases the effort required to inspect or reconstruct scripts while preserving their intended behavior.
 
-Updated **October 10, 2026** for the current **Voltfuscator 7.6 Nyx** release.
+Updated **October 11, 2026** for the current **Voltfuscator 7.7** release.
 
 [Website](https://voltils.cc/) · [Obfuscator dashboard](https://voltils.cc/dashboard/#obfuscate) · [Documentation](https://voltils.cc/docs/) · [Discord](https://discord.gg/78yYmtaeg4)
 
