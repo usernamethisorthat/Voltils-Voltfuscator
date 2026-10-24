@@ -1,3 +1,8 @@
+if not VLT_OBFUSCATED then
+    print("Running the source preview")
+end
+
+--!vlt:vm
 local function makeCounter(step)
     local total = 0
     return function()
@@ -6,7 +11,8 @@ local function makeCounter(step)
     end
 end
 
-local function classify(value)
+--!vlt:cff
+local function describe(value)
     if value < 0 then
         return "below zero"
     elseif value == 0 then
@@ -18,7 +24,10 @@ end
 local counter = makeCounter(4)
 assert(counter() == 4)
 assert(counter() == 8)
-assert(classify(counter()) == "above zero")
-assert(classify(-2) == "below zero")
-assert(classify(0) == "at zero")
-print("Hello from Voltfuscator!")
+assert(describe(counter()) == "above zero")
+assert(describe(-2) == "below zero")
+assert(describe(0) == "at zero")
+
+local sourceLine = VLT_LINE or 0
+assert(sourceLine >= 0)
+print("Voltfuscator example passed")
