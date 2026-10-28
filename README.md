@@ -1,10 +1,10 @@
-# Voltfuscator
+# Voltfuscator 7.7 Nyx
 
 [![Voltfuscator animated demo](source/Voltfuscator/assets/voltfuscator-demo.gif)](https://voltils.cc/)
 
 Voltfuscator is a hosted Lua 5.1 and Luau obfuscation service maintained by **Voltils**. It increases the effort required to inspect or reconstruct scripts while preserving their intended behavior.
 
-Updated **October 16, 2026** for the current **Voltfuscator 7.7** release.
+Updated **October 28, 2026** for **Voltfuscator 7.7 Nyx**.
 
 [Website](https://voltils.cc/) · [Obfuscator dashboard](https://voltils.cc/dashboard/#obfuscate) · [Documentation](https://voltils.cc/docs/) · [Discord](https://discord.gg/78yYmtaeg4)
 
@@ -23,18 +23,18 @@ Normal is the default when an API request omits `preset`. There is no public Lig
 
 Sign in with Discord. New accounts start on **Basic**. Every signed-in account can generate and use API keys; API access does not require a Pro upgrade or manual approval.
 
-| Tier | Per rolling 12 hours | Maximum per day (UTC) | Source limit |
+| Tier | Per rolling 12 hours | Maximum per day (UTC) | Maximum UTF-8 source |
 | --- | ---: | ---: | ---: |
-| Basic | **3** | **6** | **256,000 characters** |
-| Pro | **12** | **24** | **5,000,000 characters** |
-| Elite | **120** | **240** | **10,000,000 characters** |
+| Basic | **3** | **6** | **350 KiB (358,400 bytes)** |
+| Pro | **12** | **24** | **450 KiB (460,800 bytes)** |
+| Elite | **120** | **240** | **450 KiB (460,800 bytes)** |
 
 Website, bot, and API builds share the same account allowance. Creating more keys does not increase it. Each rolling-window slot returns 12 hours after its successful build completes. Daily caps reset at **00:00 UTC**; this does not clear builds still inside the rolling 12-hour window. Failed builds do not consume successful-build quota. Pending jobs temporarily reserve a slot.
 
 ## Website
 
 1. Open [the dashboard](https://voltils.cc/dashboard/#obfuscate) and sign in with Discord.
-2. Paste your Lua or Luau source.
+2. Paste your Lua or Luau source, or upload a `.lua`, `.luau`, or `.txt` file.
 3. Select **Normal** or **Max**, choose **Lua 5.1** or **Executor / Luau** for your host, then obfuscate.
 4. Copy or download the output before leaving the workspace.
 
@@ -49,6 +49,20 @@ Join the [Discord server](https://discord.gg/78yYmtaeg4), then DM the bot a `.lu
 - Optional Anti-HTTP Spy is available through the bot panel for compatible runtimes.
 - Successful jobs use your shared Basic, Pro, or Elite quota.
 - Account-update DMs are sent only for actual tier upgrades. Downgrades and unchanged tiers do not send an account-update DM; existing API keys remain active.
+
+## Source Optimization (Experimental)
+
+Source Optimization is separate from the protection preset and defaults to **Off**. The website, Discord panel, and API offer these modes:
+
+| Mode | Behavior |
+| --- | --- |
+| Off | Compiles the original source with the selected preset. |
+| Standard | Applies supported source optimizations while keeping the selected protection preset. |
+| Performance | Prioritizes execution speed with reduced protection for eligible functions. |
+
+Results depend on your script; a speedup is not guaranteed.
+
+The website/API can preview transformed **unprotected source**. Previews require authentication and obey input, rate, and compiler limits, but do not consume successful-build quota. The service returns previews with `Cache-Control: no-store` and does not persist them.
 
 ## Macros
 
@@ -130,13 +144,16 @@ Successful response:
 
 `code` must be nonempty UTF-8 source. `preset` accepts `normal` or `max` and defaults to `normal`. `runtime` accepts `lua51`, `luau`, or `executor`; omitting it defaults to `luau`. Use `executor` for Roblox/executor output with environment checks requiring Roblox APIs and `getgenv()`. Standard `lua51` and `luau` modes do not require those executor APIs. Account usage metadata is returned in the `X-Voltfuscator-Usage` response header. `GET https://voltils.cc/v1/obfuscate` returns service and tier information; it does not compile a script.
 
+Optional `sourceOptimization` accepts `"off"` (default), `"standard"`, or `"performance"`. Add `previewOptimized: true` to return `optimizedSource` with `experimental: true` instead of protected output. Review the protection tradeoff above before selecting Performance.
+
 The old `api.voltils.nxtdev.xyz` URL is not the endpoint documented for current clients.
 
 ### Limits and errors
 
-- Source size: **256,000 characters for Basic**, **5,000,000 for Pro**, and **10,000,000 for Elite**. Unicode characters are counted as code points.
-- Compiler budget: **60 seconds** per build.
-- One active job per account; the compiler also has one processing slot.
+- Source size: **350 KiB for Basic**, **450 KiB for Pro and Elite**, measured in UTF-8 bytes. One KiB is 1,024 bytes; non-ASCII text can use multiple bytes per character.
+- Compiler budget: **15 seconds** per build. Scripts within the source limit can still exceed the time budget.
+- One active protected build per account; **two shared compiler slots** across API and Discord. Busy requests receive a retry response rather than joining a queue.
+- Protected output limit: **16 MiB**.
 - An interrupted connection can leave a reservation pending for up to **90 seconds**. A success already confirmed still counts.
 - `400`: invalid request, preset, or runtime; `401`: invalid, expired, or revoked credentials; `413`: invalid source size; `429`: quota, attempt limit, or compiler busy; `5xx`: temporary service/compiler failure.
 
@@ -144,26 +161,28 @@ Follow retry guidance when rate-limited or busy. Limits may change; the live das
 
 ## Included examples
 
-`example.source.lua` is the readable input. `example.lua` was regenerated on October 16, 2026 with the current Max compiler, Executor / Luau runtime checks, and anti-tamper enabled. Both print:
+`example.source.lua` is the readable input. `example.lua` is the bundled Max protected sample, labeled **Voltfuscator 7.7 Nyx** and **Luau/Executor** in its header. The source's final success message is:
 
 ```text
-Hello from Voltfuscator!
+Voltfuscator example passed
 ```
+
+The readable source also prints `Running the source preview` when run without the obfuscation macro flag.
 
 ```text
 README.md                      Service and API documentation
 example.source.lua             Readable example input
 example.lua                    Max protected output
-source/Voltfuscator/vm.lua      Source-availability notice
+source/Voltfuscator/vm.lua      Comment-only placeholder
 ```
 
-The protected sample requires a compatible Roblox executor with Roblox APIs and `getgenv()`. Keep its generated formatting intact. `source/Voltfuscator/vm.lua` is a source-availability notice. For standard Lua 5.1 or standalone Luau, generate output with the matching runtime in the service.
+The protected sample requires a compatible Roblox executor with Roblox APIs and `getgenv()`. Keep its generated formatting intact. `source/Voltfuscator/vm.lua` contains only a comment, not the compiler or VM implementation. For standard Lua 5.1 or standalone Luau, generate output with the matching runtime in the service.
 
 ## Compatibility and source availability
 
 This package is a public information and output-sample distribution. It does **not** contain the private production obfuscator source.
 
-Your script's required APIs must exist in the target environment. Test the protected output in that environment before distributing it.
+Supported output targets are **Lua 5.1** and **Luau**, covering the compiler's implemented source subset. Lua 5.2, 5.3, 5.4, and LuaJIT are not certified output targets. Your script's required APIs must exist in the target environment. Test the protected output in its intended host before distributing it.
 
 ## Privacy and policies
 
