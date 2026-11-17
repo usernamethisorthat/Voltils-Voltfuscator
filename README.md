@@ -1,4 +1,4 @@
-# Voltfuscator 8.0
+# Voltfuscator 8.1
 
 [![Voltfuscator demo](source/Voltfuscator/assets/voltfuscator-demo.gif)](https://voltils.cc/)
 
@@ -88,7 +88,7 @@ This repository includes sample files so you can see what Voltfuscator output lo
 | File | Description |
 | --- | --- |
 | `example.source.lua` | Readable example script |
-| `example.lua` | Example protected with Voltfuscator 8.0 |
+| `example.lua` | Example protected with Voltfuscator 8.1 |
 
 The protected example targets a Roblox executor environment. To protect your own scripts, use the [website](https://voltils.cc/) or API and select the appropriate runtime.
 
